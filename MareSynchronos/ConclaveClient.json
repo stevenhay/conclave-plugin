@@ -1,13 +1,13 @@
 {
-  "Author": "darkarchon",
-  "Name": "Mare Synchronos",
+  "Author": "stevie",
+  "Name": "ConclaveClient",
   "Punchline": "Let others see you as you see yourself.",
   "Description": "This plugin will synchronize your Penumbra mods and current Glamourer state with other paired clients automatically.",
-  "InternalName": "mareSynchronos",
+  "InternalName": "ConclaveClient",
   "ApplicableVersion": "any",
   "Tags": [
     "customization"
   ],
-  "IconUrl": "https://raw.githubusercontent.com/Penumbra-Sync/client/main/MareSynchronos/images/logo.png",
-  "RepoUrl": "https://github.com/Penumbra-Sync/client"
+  "IconUrl": "",
+  "RepoUrl": "https://github.com/stevenhay/conclave-plugin"
 }

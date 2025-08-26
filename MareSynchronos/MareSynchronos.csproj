@@ -1,12 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Dalamud.NET.Sdk/13.0.0">
   <PropertyGroup>
+    <AssemblyTitle>ConclaveClient</AssemblyTitle>
+    <AssemblyName>ConclaveClient</AssemblyName>
     <Authors></Authors>
     <Company></Company>
     <Version>1.11.0</Version>
     <Description></Description>
     <Copyright></Copyright>
-    <PackageProjectUrl>https://github.com/Penumbra-Sync/client</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/stevenhay/conclave-plugin</PackageProjectUrl>
   </PropertyGroup>
 
   <PropertyGroup>
