@@ -7,8 +7,8 @@
       "customization"
     ],
     "InternalName": "MareSynchronos",
-    "AssemblyVersion": "1.0.2",
-    "TestingAssemblyVersion": "1.0.2",
+    "AssemblyVersion": "1.0.3",
+    "TestingAssemblyVersion": "1.0.3",
     "RepoUrl": "https://github.com/stevenhay/conclave-plugin",
     "ApplicableVersion": "any",
     "DalamudApiLevel": 13,
@@ -16,9 +16,9 @@
     "IsTestingExclusive": "False",
     "DownloadCount": 0,
     "LastUpdate": 0,
-    "DownloadLinkInstall": "https://github.com/stevenhay/conclave-plugin/releases/download/1.0.2/ConclaveClient.zip",
-    "DownloadLinkTesting": "https://github.com/stevenhay/conclave-plugin/releases/download/1.0.2/ConclaveClient.zip",
-    "DownloadLinkUpdate": "https://github.com/stevenhay/conclave-plugin/releases/download/1.0.2/ConclaveClient.zip",
+    "DownloadLinkInstall": "https://github.com/stevenhay/conclave-plugin/releases/download/1.0.3/ConclaveClient.zip",
+    "DownloadLinkTesting": "https://github.com/stevenhay/conclave-plugin/releases/download/1.0.3/ConclaveClient.zip",
+    "DownloadLinkUpdate": "https://github.com/stevenhay/conclave-plugin/releases/download/1.0.3/ConclaveClient.zip",
     "IconUrl": ""
   }
 ]
