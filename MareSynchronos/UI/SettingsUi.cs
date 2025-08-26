@@ -1369,20 +1369,6 @@ public class SettingsUi : WindowMediatorSubscriberBase
 
         _uiShared.BigText("Service & Character Settings");
         ImGuiHelpers.ScaledDummy(new Vector2(5, 5));
-        var sendCensus = _serverConfigurationManager.SendCensusData;
-        if (ImGui.Checkbox("Send Statistical Census Data", ref sendCensus))
-        {
-            _serverConfigurationManager.SendCensusData = sendCensus;
-        }
-        _uiShared.DrawHelpText("This will allow sending census data to the currently connected service." + UiSharedService.TooltipSeparator
-            + "Census data contains:" + Environment.NewLine
-            + "- Current World" + Environment.NewLine
-            + "- Current Gender" + Environment.NewLine
-            + "- Current Race" + Environment.NewLine
-            + "- Current Clan (this is not your Free Company, this is e.g. Keeper or Seeker for Miqo'te)" + UiSharedService.TooltipSeparator
-            + "The census data is only saved temporarily and will be removed from the server on disconnect. It is stored temporarily associated with your UID while you are connected." + UiSharedService.TooltipSeparator
-            + "If you do not wish to participate in the statistical census, untick this box and reconnect to the server.");
-        ImGuiHelpers.ScaledDummy(new Vector2(10, 10));
 
         var idx = _uiShared.DrawServiceSelection();
         if (_lastSelectedServerIndex != idx)

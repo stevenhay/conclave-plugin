@@ -46,7 +46,7 @@ public class ServerConfigurationManager
     {
         get
         {
-            return _configService.Current.SendCensusData;
+            return false;
         }
         set
         {
@@ -59,7 +59,7 @@ public class ServerConfigurationManager
     {
         get
         {
-            return _configService.Current.ShownCensusPopup;
+            return true;
         }
         set
         {

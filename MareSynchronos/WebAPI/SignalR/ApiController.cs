@@ -107,15 +107,6 @@ public sealed partial class ApiController : DisposableMediatorSubscriberBase, IM
 
     public async Task CreateConnectionsAsync()
     {
-        if (!_serverManager.ShownCensusPopup)
-        {
-            Mediator.Publish(new OpenCensusPopupMessage());
-            while (!_serverManager.ShownCensusPopup)
-            {
-                await Task.Delay(500).ConfigureAwait(false);
-            }
-        }
-
         Logger.LogDebug("CreateConnections called");
 
         if (_serverManager.CurrentServer?.FullPause ?? true)
