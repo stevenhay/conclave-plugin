@@ -7,8 +7,8 @@
       "customization"
     ],
     "InternalName": "ConclaveClient",
-    "AssemblyVersion": "0.1.0",
-    "TestingAssemblyVersion": "0.1.0",
+    "AssemblyVersion": "1.5.1.1",
+    "TestingAssemblyVersion": "1.5.1.1",
     "RepoUrl": "https://github.com/stevenhay/conclave-plugin",
     "ApplicableVersion": "any",
     "DalamudApiLevel": 13,
