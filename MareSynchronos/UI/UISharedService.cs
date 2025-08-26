@@ -462,7 +462,7 @@ public partial class UiSharedService : DisposableMediatorSubscriberBase
         {
             if (IconButton(FontAwesomeIcon.Folder))
             {
-                FileDialogManager.OpenFolderDialog("Pick Mare Synchronos Storage Folder", (success, path) =>
+                FileDialogManager.OpenFolderDialog("Pick Conclave Storage Folder", (success, path) =>
                 {
                     if (!success) return;
 

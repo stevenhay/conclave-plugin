@@ -89,9 +89,9 @@ public class MarePlugin : MediatorSubscriberBase, IHostedService
     public Task StartAsync(CancellationToken cancellationToken)
     {
         var version = Assembly.GetExecutingAssembly().GetName().Version!;
-        Logger.LogInformation("Launching {name} {major}.{minor}.{build}", "Mare Synchronos", version.Major, version.Minor, version.Build);
+        Logger.LogInformation("Launching {name} {major}.{minor}.{build}", "Conclave", version.Major, version.Minor, version.Build);
         Mediator.Publish(new EventMessage(new Services.Events.Event(nameof(MarePlugin), Services.Events.EventSeverity.Informational,
-            $"Starting Mare Synchronos {version.Major}.{version.Minor}.{version.Build}")));
+            $"Starting Conclave {version.Major}.{version.Minor}.{version.Build}")));
 
         Mediator.Subscribe<SwitchToMainUiMessage>(this, (msg) => { if (_launchTask == null || _launchTask.IsCompleted) _launchTask = Task.Run(WaitForPlayerAndLaunchCharacterManager); });
         Mediator.Subscribe<DalamudLoginMessage>(this, (_) => DalamudUtilOnLogIn());
@@ -143,6 +143,7 @@ public class MarePlugin : MediatorSubscriberBase, IHostedService
             _runtimeServiceScope.ServiceProvider.GetRequiredService<CommandManagerService>();
             if (!_mareConfigService.Current.HasValidSetup() || !_serverConfigurationManager.HasValidConfig())
             {
+                Logger?.LogDebug("--------- SWITCH TO INTRO UI MESSAGE -------");
                 Mediator.Publish(new SwitchToIntroUiMessage());
                 return;
             }

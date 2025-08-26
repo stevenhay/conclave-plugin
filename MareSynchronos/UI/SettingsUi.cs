@@ -77,7 +77,7 @@ public class SettingsUi : WindowMediatorSubscriberBase
         FileCacheManager fileCacheManager,
         FileCompactor fileCompactor, ApiController apiController,
         IpcManager ipcManager, CacheMonitor cacheMonitor,
-        DalamudUtilService dalamudUtilService, HttpClient httpClient) : base(logger, mediator, "Mare Synchronos Settings", performanceCollector)
+        DalamudUtilService dalamudUtilService, HttpClient httpClient) : base(logger, mediator, "Conclave Settings", performanceCollector)
     {
         _configService = configService;
         _pairManager = pairManager;
@@ -661,7 +661,7 @@ public class SettingsUi : WindowMediatorSubscriberBase
         }
 
         ImGui.AlignTextToFramePadding();
-        ImGui.TextUnformatted("Monitoring Mare Storage Folder: " + (_cacheMonitor.MareWatcher?.Path ?? "Not monitoring"));
+        ImGui.TextUnformatted("Monitoring Conclave Folder: " + (_cacheMonitor.MareWatcher?.Path ?? "Not monitoring"));
         if (string.IsNullOrEmpty(_cacheMonitor.MareWatcher?.Path))
         {
             ImGui.SameLine();
@@ -679,7 +679,7 @@ public class SettingsUi : WindowMediatorSubscriberBase
                 _cacheMonitor.StartPenumbraWatcher(_ipcManager.Penumbra.ModDirectory);
                 _cacheMonitor.InvokeScan();
             }
-            UiSharedService.AttachToolTip("Attempts to resume monitoring for both Penumbra and Mare Storage. "
+            UiSharedService.AttachToolTip("Attempts to resume monitoring for both Penumbra and Conclave. "
                 + "Resuming the monitoring will also force a full scan to run." + Environment.NewLine
                 + "If the button remains present after clicking it, consult /xllog for errors");
         }
@@ -692,8 +692,8 @@ public class SettingsUi : WindowMediatorSubscriberBase
                     _cacheMonitor.StopMonitoring();
                 }
             }
-            UiSharedService.AttachToolTip("Stops the monitoring for both Penumbra and Mare Storage. "
-                + "Do not stop the monitoring, unless you plan to move the Penumbra and Mare Storage folders, to ensure correct functionality of Mare." + Environment.NewLine
+            UiSharedService.AttachToolTip("Stops the monitoring for both Penumbra and Conclave. "
+                + "Do not stop the monitoring, unless you plan to move the Penumbra and Conclave folders, to ensure correct functionality of Conclave." + Environment.NewLine
                 + "If you stop the monitoring to move folders around, resume it after you are finished moving the files."
                 + UiSharedService.TooltipSeparator + "Hold CTRL to enable this button");
         }
@@ -730,7 +730,7 @@ public class SettingsUi : WindowMediatorSubscriberBase
                     _cacheMonitor.RecalculateFileCacheSize(CancellationToken.None);
                 });
             }
-            UiSharedService.AttachToolTip("This will run compression on all files in your current Mare Storage." + Environment.NewLine
+            UiSharedService.AttachToolTip("This will run compression on all files in your current Conclave Storage." + Environment.NewLine
                 + "You do not need to run this manually if you keep the file compactor enabled.");
             ImGui.SameLine();
             if (_uiShared.IconTextButton(FontAwesomeIcon.File, "Decompact all files in storage"))
@@ -741,7 +741,7 @@ public class SettingsUi : WindowMediatorSubscriberBase
                     _cacheMonitor.RecalculateFileCacheSize(CancellationToken.None);
                 });
             }
-            UiSharedService.AttachToolTip("This will run decompression on all files in your current Mare Storage.");
+            UiSharedService.AttachToolTip("This will run decompression on all files in your current Conclave Storage.");
         }
         else
         {
@@ -755,7 +755,7 @@ public class SettingsUi : WindowMediatorSubscriberBase
         ImGuiHelpers.ScaledDummy(new Vector2(10, 10));
 
         ImGui.Separator();
-        UiSharedService.TextWrapped("File Storage validation can make sure that all files in your local Mare Storage are valid. " +
+        UiSharedService.TextWrapped("File Storage validation can make sure that all files in your local Conclave Storage are valid. " +
             "Run the validation before you clear the Storage for no reason. " + Environment.NewLine +
             "This operation, depending on how many files you have in your storage, can take a while and will be CPU and drive intensive.");
         using (ImRaii.Disabled(_validationTask != null && !_validationTask.IsCompleted))
@@ -1938,12 +1938,6 @@ public class SettingsUi : WindowMediatorSubscriberBase
         }
 
         ImGui.AlignTextToFramePadding();
-        ImGui.TextUnformatted("Community and Support:");
-        ImGui.SameLine();
-        if (ImGui.Button("Mare Synchronos Discord"))
-        {
-            Util.OpenLink("https://discord.gg/mpNdkrTRjW");
-        }
         ImGui.Separator();
         if (ImGui.BeginTabBar("mainTabBar"))
         {
