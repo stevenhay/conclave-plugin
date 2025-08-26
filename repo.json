@@ -1,0 +1,25 @@
+[
+  {
+    "Author": "Stevie",
+    "Name": "Conclave Client",
+    "Description": "no cease and desist please",
+    "Tags": [
+      "customization"
+    ],
+    "InternalName": "ConclaveClient",
+    "AssemblyVersion": "0.1.0",
+    "TestingAssemblyVersion": "0.1.0",
+    "RepoUrl": "https://github.com/stevenhay/conclave-plugin",
+    "ApplicableVersion": "any",
+    "DalamudApiLevel": 12,
+    "IsHide": "False",
+    "IsTestingExclusive": "False",
+    "DownloadCount": 0,
+    "LastUpdate": 0,
+    "DownloadLinkInstall": "https://github.com/stevenhay/conclave-plugin/releases/download/1.0.1/ConclaveClient.zip",
+    "DownloadLinkTesting": "https://github.com/stevenhay/conclave-plugin/releases/download/1.0.1/ConclaveClient.zip",
+    "DownloadLinkUpdate": "https://github.com/stevenhay/conclave-plugin/releases/download/1.0.1/ConclaveClient.zip",
+    "IconUrl": ""
+  }
+]
+
