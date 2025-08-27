@@ -245,7 +245,6 @@ public sealed class GameObjectHandler : DisposableMediatorSubscriberBase, IHighP
                 if (_isOwnedObject && ObjectKind == ObjectKind.Player
                     && (gender != Gender || raceId != RaceId || tribeId != TribeId))
                 {
-                    Mediator.Publish(new CensusUpdateMessage(gender, raceId, tribeId));
                     Gender = gender;
                     RaceId = raceId;
                     TribeId = tribeId;

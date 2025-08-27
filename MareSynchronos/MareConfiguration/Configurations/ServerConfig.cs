@@ -10,11 +10,8 @@ public class ServerConfig : IMareConfiguration
 
     public List<ServerStorage> ServerStorage { get; set; } = new()
     {
-        { new ServerStorage() { ServerName = ApiController.MainServer, ServerUri = ApiController.MainServiceUri, UseOAuth2 = true } },
+        { new ServerStorage() { ServerName = ApiController.MainServer, ServerUri = ApiController.MainServiceUri } },
     };
-
-    public bool SendCensusData { get; set; } = false;
-    public bool ShownCensusPopup { get; set; } = false;
 
     public int Version { get; set; } = 2;
 }

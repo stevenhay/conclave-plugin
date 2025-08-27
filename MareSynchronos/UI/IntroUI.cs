@@ -133,14 +133,8 @@ public partial class IntroUi : WindowMediatorSubscriberBase
                     serverIdx = _uiShared.DrawServiceSelection(selectOnChange: true, showConnect: false);
                     if (serverIdx != _prevIdx)
                     {
-                        _uiShared.ResetOAuthTasksState();
                         _prevIdx = serverIdx;
                     }
-
-                    selectedServer = _serverConfigurationManager.GetServerByIndex(serverIdx);
-
-                    _serverConfigurationManager.GetServerByIndex(serverIdx).UseOAuth2 = false;
-                    _serverConfigurationManager.Save();
                 }
             }
 

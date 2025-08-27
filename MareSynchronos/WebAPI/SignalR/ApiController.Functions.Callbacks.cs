@@ -83,6 +83,7 @@ public partial class ApiController
 
     public Task Client_ReceiveServerMessage(MessageSeverity messageSeverity, string message)
     {
+        Logger.LogInformation("Client_ReceiveServerMessage: {sev}: {message}", messageSeverity, message);
         switch (messageSeverity)
         {
             case MessageSeverity.Error:
