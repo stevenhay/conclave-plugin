@@ -61,34 +61,17 @@ public sealed class TokenProvider : IDisposable, IMediatorSubscriber
             {
                 _logger.LogDebug("GetNewToken: Requesting");
 
-                if (!_serverManager.CurrentServer.UseOAuth2)
-                {
-                    tokenUri = MareAuth.AuthFullPath(new Uri(_serverManager.CurrentApiUrl
-                        .Replace("wss://", "https://", StringComparison.OrdinalIgnoreCase)
-                        .Replace("ws://", "http://", StringComparison.OrdinalIgnoreCase)));
-                    var secretKey = _serverManager.GetSecretKey(out _)!;
-                    var auth = secretKey.GetHash256();
-                    _logger.LogInformation("Sending SecretKey Request to server with auth {auth}", string.Join("", identifier.SecretKeyOrOAuth.Take(10)));
-                    result = await _httpClient.PostAsync(tokenUri, new FormUrlEncodedContent(
-                    [
-                            new KeyValuePair<string, string>("auth", auth),
-                            new KeyValuePair<string, string>("charaIdent", await _dalamudUtil.GetPlayerNameHashedAsync().ConfigureAwait(false)),
-                    ]), ct).ConfigureAwait(false);
-                }
-                else
-                {
-                    tokenUri = MareAuth.AuthWithOauthFullPath(new Uri(_serverManager.CurrentApiUrl
-                        .Replace("wss://", "https://", StringComparison.OrdinalIgnoreCase)
-                        .Replace("ws://", "http://", StringComparison.OrdinalIgnoreCase)));
-                    HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, tokenUri.ToString());
-                    request.Content = new FormUrlEncodedContent([
-                        new KeyValuePair<string, string>("uid", identifier.UID),
-                        new KeyValuePair<string, string>("charaIdent", identifier.CharaHash)
-                        ]);
-                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", identifier.SecretKeyOrOAuth);
-                    _logger.LogInformation("Sending OAuth Request to server with auth {auth}", string.Join("", identifier.SecretKeyOrOAuth.Take(10)));
-                    result = await _httpClient.SendAsync(request, ct).ConfigureAwait(false);
-                }
+                tokenUri = MareAuth.AuthFullPath(new Uri(_serverManager.CurrentApiUrl
+                    .Replace("wss://", "https://", StringComparison.OrdinalIgnoreCase)
+                    .Replace("ws://", "http://", StringComparison.OrdinalIgnoreCase)));
+                var secretKey = _serverManager.GetSecretKey(out _)!;
+                var auth = secretKey.GetHash256();
+                _logger.LogInformation("Sending SecretKey Request to server with auth {auth}", string.Join("", identifier.SecretKey.Take(10)));
+                result = await _httpClient.PostAsync(tokenUri, new FormUrlEncodedContent(
+                [
+                        new KeyValuePair<string, string>("auth", auth),
+                        new KeyValuePair<string, string>("charaIdent", await _dalamudUtil.GetPlayerNameHashedAsync().ConfigureAwait(false)),
+                ]), ct).ConfigureAwait(false);
             }
             else
             {
@@ -160,25 +143,10 @@ public sealed class TokenProvider : IDisposable, IMediatorSubscriber
                 return _lastJwtIdentifier;
             }
 
-            if (_serverManager.CurrentServer.UseOAuth2)
-            {
-                var (OAuthToken, UID) = _serverManager.GetOAuth2(out _)
-                    ?? throw new InvalidOperationException("Requested OAuth2 but received null");
+            var secretKey = _serverManager.GetSecretKey(out _)
+                ?? throw new InvalidOperationException("Requested SecretKey but received null");
 
-                jwtIdentifier = new(_serverManager.CurrentApiUrl,
-                    playerIdentifier,
-                    UID, OAuthToken);
-            }
-            else
-            {
-                var secretKey = _serverManager.GetSecretKey(out _)
-                    ?? throw new InvalidOperationException("Requested SecretKey but received null");
-
-                jwtIdentifier = new(_serverManager.CurrentApiUrl,
-                                    playerIdentifier,
-                                    string.Empty,
-                                    secretKey);
-            }
+            jwtIdentifier = new(_serverManager.CurrentApiUrl, playerIdentifier, string.Empty, secretKey);
             _lastJwtIdentifier = jwtIdentifier;
         }
         catch (Exception ex)
@@ -237,42 +205,4 @@ public sealed class TokenProvider : IDisposable, IMediatorSubscriber
         return await GetNewToken(renewal, jwtIdentifier, ct).ConfigureAwait(false);
     }
 
-    public async Task<bool> TryUpdateOAuth2LoginTokenAsync(ServerStorage currentServer, bool forced = false)
-    {
-        var oauth2 = _serverManager.GetOAuth2(out _);
-        if (oauth2 == null) return false;
-
-        var handler = new JwtSecurityTokenHandler();
-        var jwt = handler.ReadJwtToken(oauth2.Value.OAuthToken);
-        if (!forced)
-        {
-            if (jwt.ValidTo == DateTime.MinValue || jwt.ValidTo.Subtract(TimeSpan.FromDays(7)) > DateTime.Now)
-                return true;
-
-            if (jwt.ValidTo < DateTime.UtcNow)
-                return false;
-        }
-
-        var tokenUri = MareAuth.RenewOAuthTokenFullPath(new Uri(currentServer.ServerUri
-            .Replace("wss://", "https://", StringComparison.OrdinalIgnoreCase)
-            .Replace("ws://", "http://", StringComparison.OrdinalIgnoreCase)));
-        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, tokenUri.ToString());
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", oauth2.Value.OAuthToken);
-        _logger.LogInformation("Sending Request to server with auth {auth}", string.Join("", oauth2.Value.OAuthToken.Take(10)));
-        var result = await _httpClient.SendAsync(request).ConfigureAwait(false);
-
-        if (!result.IsSuccessStatusCode)
-        {
-            _logger.LogWarning("Could not renew OAuth2 Login token, error code {error}", result.StatusCode);
-            currentServer.OAuthToken = null;
-            _serverManager.Save();
-            return false;
-        }
-
-        var newToken = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
-        currentServer.OAuthToken = newToken;
-        _serverManager.Save();
-
-        return true;
-    }
 }

@@ -77,7 +77,7 @@ public class SettingsUi : WindowMediatorSubscriberBase
         FileCacheManager fileCacheManager,
         FileCompactor fileCompactor, ApiController apiController,
         IpcManager ipcManager, CacheMonitor cacheMonitor,
-        DalamudUtilService dalamudUtilService, HttpClient httpClient) : base(logger, mediator, "Mare Synchronos Settings", performanceCollector)
+        DalamudUtilService dalamudUtilService, HttpClient httpClient) : base(logger, mediator, "Conclave Settings", performanceCollector)
     {
         _configService = configService;
         _pairManager = pairManager;
@@ -118,7 +118,6 @@ public class SettingsUi : WindowMediatorSubscriberBase
 
     public override void OnOpen()
     {
-        _uiShared.ResetOAuthTasksState();
         _speedTestCts = new();
     }
 
@@ -661,7 +660,7 @@ public class SettingsUi : WindowMediatorSubscriberBase
         }
 
         ImGui.AlignTextToFramePadding();
-        ImGui.TextUnformatted("Monitoring Mare Storage Folder: " + (_cacheMonitor.MareWatcher?.Path ?? "Not monitoring"));
+        ImGui.TextUnformatted("Monitoring Conclave Folder: " + (_cacheMonitor.MareWatcher?.Path ?? "Not monitoring"));
         if (string.IsNullOrEmpty(_cacheMonitor.MareWatcher?.Path))
         {
             ImGui.SameLine();
@@ -679,7 +678,7 @@ public class SettingsUi : WindowMediatorSubscriberBase
                 _cacheMonitor.StartPenumbraWatcher(_ipcManager.Penumbra.ModDirectory);
                 _cacheMonitor.InvokeScan();
             }
-            UiSharedService.AttachToolTip("Attempts to resume monitoring for both Penumbra and Mare Storage. "
+            UiSharedService.AttachToolTip("Attempts to resume monitoring for both Penumbra and Conclave. "
                 + "Resuming the monitoring will also force a full scan to run." + Environment.NewLine
                 + "If the button remains present after clicking it, consult /xllog for errors");
         }
@@ -692,8 +691,8 @@ public class SettingsUi : WindowMediatorSubscriberBase
                     _cacheMonitor.StopMonitoring();
                 }
             }
-            UiSharedService.AttachToolTip("Stops the monitoring for both Penumbra and Mare Storage. "
-                + "Do not stop the monitoring, unless you plan to move the Penumbra and Mare Storage folders, to ensure correct functionality of Mare." + Environment.NewLine
+            UiSharedService.AttachToolTip("Stops the monitoring for both Penumbra and Conclave. "
+                + "Do not stop the monitoring, unless you plan to move the Penumbra and Conclave folders, to ensure correct functionality of Conclave." + Environment.NewLine
                 + "If you stop the monitoring to move folders around, resume it after you are finished moving the files."
                 + UiSharedService.TooltipSeparator + "Hold CTRL to enable this button");
         }
@@ -730,7 +729,7 @@ public class SettingsUi : WindowMediatorSubscriberBase
                     _cacheMonitor.RecalculateFileCacheSize(CancellationToken.None);
                 });
             }
-            UiSharedService.AttachToolTip("This will run compression on all files in your current Mare Storage." + Environment.NewLine
+            UiSharedService.AttachToolTip("This will run compression on all files in your current Conclave Storage." + Environment.NewLine
                 + "You do not need to run this manually if you keep the file compactor enabled.");
             ImGui.SameLine();
             if (_uiShared.IconTextButton(FontAwesomeIcon.File, "Decompact all files in storage"))
@@ -741,7 +740,7 @@ public class SettingsUi : WindowMediatorSubscriberBase
                     _cacheMonitor.RecalculateFileCacheSize(CancellationToken.None);
                 });
             }
-            UiSharedService.AttachToolTip("This will run decompression on all files in your current Mare Storage.");
+            UiSharedService.AttachToolTip("This will run decompression on all files in your current Conclave Storage.");
         }
         else
         {
@@ -755,7 +754,7 @@ public class SettingsUi : WindowMediatorSubscriberBase
         ImGuiHelpers.ScaledDummy(new Vector2(10, 10));
 
         ImGui.Separator();
-        UiSharedService.TextWrapped("File Storage validation can make sure that all files in your local Mare Storage are valid. " +
+        UiSharedService.TextWrapped("File Storage validation can make sure that all files in your local Conclave Storage are valid. " +
             "Run the validation before you clear the Storage for no reason. " + Environment.NewLine +
             "This operation, depending on how many files you have in your storage, can take a while and will be CPU and drive intensive.");
         using (ImRaii.Disabled(_validationTask != null && !_validationTask.IsCompleted))
@@ -1369,25 +1368,10 @@ public class SettingsUi : WindowMediatorSubscriberBase
 
         _uiShared.BigText("Service & Character Settings");
         ImGuiHelpers.ScaledDummy(new Vector2(5, 5));
-        var sendCensus = _serverConfigurationManager.SendCensusData;
-        if (ImGui.Checkbox("Send Statistical Census Data", ref sendCensus))
-        {
-            _serverConfigurationManager.SendCensusData = sendCensus;
-        }
-        _uiShared.DrawHelpText("This will allow sending census data to the currently connected service." + UiSharedService.TooltipSeparator
-            + "Census data contains:" + Environment.NewLine
-            + "- Current World" + Environment.NewLine
-            + "- Current Gender" + Environment.NewLine
-            + "- Current Race" + Environment.NewLine
-            + "- Current Clan (this is not your Free Company, this is e.g. Keeper or Seeker for Miqo'te)" + UiSharedService.TooltipSeparator
-            + "The census data is only saved temporarily and will be removed from the server on disconnect. It is stored temporarily associated with your UID while you are connected." + UiSharedService.TooltipSeparator
-            + "If you do not wish to participate in the statistical census, untick this box and reconnect to the server.");
-        ImGuiHelpers.ScaledDummy(new Vector2(10, 10));
 
         var idx = _uiShared.DrawServiceSelection();
         if (_lastSelectedServerIndex != idx)
         {
-            _uiShared.ResetOAuthTasksState();
             _secretKeysConversionCts = _secretKeysConversionCts.CancelRecreate();
             _secretKeysConversionTask = null;
             _lastSelectedServerIndex = idx;
@@ -1401,65 +1385,16 @@ public class SettingsUi : WindowMediatorSubscriberBase
             UiSharedService.ColorTextWrapped("For any changes to be applied to the current service you need to reconnect to the service.", ImGuiColors.DalamudYellow);
         }
 
-        bool useOauth = selectedServer.UseOAuth2;
-
         if (ImGui.BeginTabBar("serverTabBar"))
         {
             if (ImGui.BeginTabItem("Character Management"))
             {
-                if (selectedServer.SecretKeys.Any() || useOauth)
+                if (selectedServer.SecretKeys.Any())
                 {
                     UiSharedService.ColorTextWrapped("Characters listed here will automatically connect to the selected Mare service with the settings as provided below." +
                         " Make sure to enter the character names correctly or use the 'Add current character' button at the bottom.", ImGuiColors.DalamudYellow);
                     int i = 0;
-                    _uiShared.DrawUpdateOAuthUIDsButton(selectedServer);
 
-                    if (selectedServer.UseOAuth2 && !string.IsNullOrEmpty(selectedServer.OAuthToken))
-                    {
-                        bool hasSetSecretKeysButNoUid = selectedServer.Authentications.Exists(u => u.SecretKeyIdx != -1 && string.IsNullOrEmpty(u.UID));
-                        if (hasSetSecretKeysButNoUid)
-                        {
-                            ImGui.Dummy(new(5f, 5f));
-                            UiSharedService.TextWrapped("Some entries have been detected that have previously been assigned secret keys but not UIDs. " +
-                                "Press this button below to attempt to convert those entries.");
-                            using (ImRaii.Disabled(_secretKeysConversionTask != null && !_secretKeysConversionTask.IsCompleted))
-                            {
-                                if (_uiShared.IconTextButton(FontAwesomeIcon.ArrowsLeftRight, "Try to Convert Secret Keys to UIDs"))
-                                {
-                                    _secretKeysConversionTask = ConvertSecretKeysToUIDs(selectedServer, _secretKeysConversionCts.Token);
-                                }
-                            }
-                            if (_secretKeysConversionTask != null && !_secretKeysConversionTask.IsCompleted)
-                            {
-                                UiSharedService.ColorTextWrapped("Converting Secret Keys to UIDs", ImGuiColors.DalamudYellow);
-                            }
-                            if (_secretKeysConversionTask != null && _secretKeysConversionTask.IsCompletedSuccessfully)
-                            {
-                                Vector4? textColor = null;
-                                if (_secretKeysConversionTask.Result.PartialSuccess)
-                                {
-                                    textColor = ImGuiColors.DalamudYellow;
-                                }
-                                if (!_secretKeysConversionTask.Result.Success)
-                                {
-                                    textColor = ImGuiColors.DalamudRed;
-                                }
-                                string text = $"Conversion has completed: {_secretKeysConversionTask.Result.Result}";
-                                if (textColor == null)
-                                {
-                                    UiSharedService.TextWrapped(text);
-                                }
-                                else
-                                {
-                                    UiSharedService.ColorTextWrapped(text, textColor!.Value);
-                                }
-                                if (!_secretKeysConversionTask.Result.Success || _secretKeysConversionTask.Result.PartialSuccess)
-                                {
-                                    UiSharedService.TextWrapped("In case of conversion failures, please set the UIDs for the failed conversions manually.");
-                                }
-                            }
-                        }
-                    }
                     ImGui.Separator();
                     string youName = _dalamudUtilService.GetPlayerName();
                     uint youWorld = _dalamudUtilService.GetHomeWorldId();
@@ -1503,14 +1438,11 @@ public class SettingsUi : WindowMediatorSubscriberBase
 
                         Dictionary<int, SecretKey> keys = [];
 
-                        if (!useOauth)
+                        var secretKeyIdx = item.SecretKeyIdx;
+                        keys = selectedServer.SecretKeys;
+                        if (!keys.TryGetValue(secretKeyIdx, out var secretKey))
                         {
-                            var secretKeyIdx = item.SecretKeyIdx;
-                            keys = selectedServer.SecretKeys;
-                            if (!keys.TryGetValue(secretKeyIdx, out var secretKey))
-                            {
-                                secretKey = new();
-                            }
+                            secretKey = new();
                         }
 
                         bool thisIsYou = false;
@@ -1520,11 +1452,7 @@ public class SettingsUi : WindowMediatorSubscriberBase
                             thisIsYou = true;
                         }
                         bool misManaged = false;
-                        if (selectedServer.UseOAuth2 && !string.IsNullOrEmpty(selectedServer.OAuthToken) && string.IsNullOrEmpty(item.UID))
-                        {
-                            misManaged = true;
-                        }
-                        if (!selectedServer.UseOAuth2 && item.SecretKeyIdx == -1)
+                        if (item.SecretKeyIdx == -1)
                         {
                             misManaged = true;
                         }
@@ -1532,7 +1460,7 @@ public class SettingsUi : WindowMediatorSubscriberBase
                         string text = thisIsYou ? "Your Current Character" : string.Empty;
                         if (misManaged)
                         {
-                            text += " [MISMANAGED (" + (selectedServer.UseOAuth2 ? "No UID Set" : "No Secret Key Set") + ")]";
+                            text += " [MISMANAGED (No Secret Key Set)]";
                             color = ImGuiColors.DalamudRed;
                         }
                         if (selectedServer.Authentications.Where(e => e != item).Any(e => string.Equals(e.CharacterName, item.CharacterName, StringComparison.Ordinal)
@@ -1565,22 +1493,15 @@ public class SettingsUi : WindowMediatorSubscriberBase
                                 }
                             }, EqualityComparer<KeyValuePair<ushort, string>>.Default.Equals(data.FirstOrDefault(f => f.Key == worldIdx), default) ? data.First() : data.First(f => f.Key == worldIdx));
 
-                        if (!useOauth)
-                        {
-                            _uiShared.DrawCombo("Secret Key###" + item.CharacterName + i, keys, (w) => w.Value.FriendlyName,
-                                (w) =>
+                        _uiShared.DrawCombo("Secret Key###" + item.CharacterName + i, keys, (w) => w.Value.FriendlyName,
+                            (w) =>
+                            {
+                                if (w.Key != item.SecretKeyIdx)
                                 {
-                                    if (w.Key != item.SecretKeyIdx)
-                                    {
-                                        item.SecretKeyIdx = w.Key;
-                                        _serverConfigurationManager.Save();
-                                    }
-                                }, EqualityComparer<KeyValuePair<int, SecretKey>>.Default.Equals(keys.FirstOrDefault(f => f.Key == item.SecretKeyIdx), default) ? keys.First() : keys.First(f => f.Key == item.SecretKeyIdx));
-                        }
-                        else
-                        {
-                            _uiShared.DrawUIDComboForAuthentication(i, item, selectedServer.ServerUri, _logger);
-                        }
+                                    item.SecretKeyIdx = w.Key;
+                                    _serverConfigurationManager.Save();
+                                }
+                            }, EqualityComparer<KeyValuePair<int, SecretKey>>.Default.Equals(keys.FirstOrDefault(f => f.Key == item.SecretKeyIdx), default) ? keys.First() : keys.First(f => f.Key == item.SecretKeyIdx));
                         bool isAutoLogin = item.AutoLogin;
                         if (ImGui.Checkbox("Automatically login to Mare", ref isAutoLogin))
                         {
@@ -1627,7 +1548,7 @@ public class SettingsUi : WindowMediatorSubscriberBase
                 ImGui.EndTabItem();
             }
 
-            if (!useOauth && ImGui.BeginTabItem("Secret Key Management"))
+            if (ImGui.BeginTabItem("Secret Key Management"))
             {
                 foreach (var item in selectedServer.SecretKeys.ToList())
                 {
@@ -1726,30 +1647,6 @@ public class SettingsUi : WindowMediatorSubscriberBase
                 }
 
                 ImGuiHelpers.ScaledDummy(5);
-
-                if (ImGui.Checkbox("Use Discord OAuth2 Authentication", ref useOauth))
-                {
-                    selectedServer.UseOAuth2 = useOauth;
-                    _serverConfigurationManager.Save();
-                }
-                _uiShared.DrawHelpText("Use Discord OAuth2 Authentication to identify with this server instead of secret keys");
-                if (useOauth)
-                {
-                    _uiShared.DrawOAuth(selectedServer);
-                    if (string.IsNullOrEmpty(_serverConfigurationManager.GetDiscordUserFromToken(selectedServer)))
-                    {
-                        ImGuiHelpers.ScaledDummy(10f);
-                        UiSharedService.ColorTextWrapped("You have enabled OAuth2 but it is not linked. Press the buttons Check, then Authenticate to link properly.", ImGuiColors.DalamudRed);
-                    }
-                    if (!string.IsNullOrEmpty(_serverConfigurationManager.GetDiscordUserFromToken(selectedServer))
-                        && selectedServer.Authentications.TrueForAll(u => string.IsNullOrEmpty(u.UID)))
-                    {
-                        ImGuiHelpers.ScaledDummy(10f);
-                        UiSharedService.ColorTextWrapped("You have enabled OAuth2 but no characters configured. Set the correct UIDs for your characters in \"Character Management\".",
-                            ImGuiColors.DalamudRed);
-                    }
-                }
-
                 if (!isMain && selectedServer != _serverConfigurationManager.CurrentServer)
                 {
                     ImGui.Separator();
@@ -1848,78 +1745,6 @@ public class SettingsUi : WindowMediatorSubscriberBase
     private Task<(bool Success, bool PartialSuccess, string Result)>? _secretKeysConversionTask = null;
     private CancellationTokenSource _secretKeysConversionCts = new CancellationTokenSource();
 
-    private async Task<(bool Success, bool partialSuccess, string Result)> ConvertSecretKeysToUIDs(ServerStorage serverStorage, CancellationToken token)
-    {
-        List<Authentication> failedConversions = serverStorage.Authentications.Where(u => u.SecretKeyIdx == -1 && string.IsNullOrEmpty(u.UID)).ToList();
-        List<Authentication> conversionsToAttempt = serverStorage.Authentications.Where(u => u.SecretKeyIdx != -1 && string.IsNullOrEmpty(u.UID)).ToList();
-        List<Authentication> successfulConversions = [];
-        Dictionary<string, List<Authentication>> secretKeyMapping = new(StringComparer.Ordinal);
-        foreach (var authEntry in conversionsToAttempt)
-        {
-            if (!serverStorage.SecretKeys.TryGetValue(authEntry.SecretKeyIdx, out var secretKey))
-            {
-                failedConversions.Add(authEntry);
-                continue;
-            }
-
-            if (!secretKeyMapping.TryGetValue(secretKey.Key, out List<Authentication>? authList))
-            {
-                secretKeyMapping[secretKey.Key] = authList = [];
-            }
-
-            authList.Add(authEntry);
-        }
-
-        if (secretKeyMapping.Count == 0)
-        {
-            return (false, false, $"Failed to convert {failedConversions.Count} entries: " + string.Join(", ", failedConversions.Select(k => k.CharacterName)));
-        }
-
-        var baseUri = serverStorage.ServerUri.Replace("wss://", "https://").Replace("ws://", "http://");
-        var oauthCheckUri = MareAuth.GetUIDsBasedOnSecretKeyFullPath(new Uri(baseUri));
-        var requestContent = JsonContent.Create(secretKeyMapping.Select(k => k.Key).ToList());
-        HttpRequestMessage requestMessage = new(HttpMethod.Post, oauthCheckUri);
-        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", serverStorage.OAuthToken);
-        requestMessage.Content = requestContent;
-
-        using var response = await _httpClient.SendAsync(requestMessage, token).ConfigureAwait(false);
-        Dictionary<string, string>? secretKeyUidMapping = await JsonSerializer.DeserializeAsync<Dictionary<string, string>>
-            (await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false), cancellationToken: token).ConfigureAwait(false);
-        if (secretKeyUidMapping == null)
-        {
-            return (false, false, $"Failed to parse the server response. Failed to convert all entries.");
-        }
-
-        foreach (var entry in secretKeyMapping)
-        {
-            if (!secretKeyUidMapping.TryGetValue(entry.Key, out var assignedUid) || string.IsNullOrEmpty(assignedUid))
-            {
-                failedConversions.AddRange(entry.Value);
-                continue;
-            }
-
-            foreach (var auth in entry.Value)
-            {
-                auth.UID = assignedUid;
-                successfulConversions.Add(auth);
-            }
-        }
-
-        if (successfulConversions.Count > 0)
-            _serverConfigurationManager.Save();
-
-        StringBuilder sb = new();
-        sb.Append("Conversion complete." + Environment.NewLine);
-        sb.Append($"Successfully converted {successfulConversions.Count} entries." + Environment.NewLine);
-        if (failedConversions.Count > 0)
-        {
-            sb.Append($"Failed to convert {failedConversions.Count} entries, assign those manually: ");
-            sb.Append(string.Join(", ", failedConversions.Select(k => k.CharacterName)));
-        }
-
-        return (true, failedConversions.Count != 0, sb.ToString());
-    }
-
     private void DrawSettingsContent()
     {
         if (_apiController.ServerState is ServerState.Connected)
@@ -1938,12 +1763,6 @@ public class SettingsUi : WindowMediatorSubscriberBase
         }
 
         ImGui.AlignTextToFramePadding();
-        ImGui.TextUnformatted("Community and Support:");
-        ImGui.SameLine();
-        if (ImGui.Button("Mare Synchronos Discord"))
-        {
-            Util.OpenLink("https://discord.gg/mpNdkrTRjW");
-        }
         ImGui.Separator();
         if (ImGui.BeginTabBar("mainTabBar"))
         {

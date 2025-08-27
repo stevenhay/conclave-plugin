@@ -88,7 +88,7 @@ public class CompactUi : WindowMediatorSubscriberBase
                 ShowTooltip = () =>
                 {
                     ImGui.BeginTooltip();
-                    ImGui.Text("Open Mare Settings");
+                    ImGui.Text("Open Conclave Settings");
                     ImGui.EndTooltip();
                 }
             },
@@ -103,7 +103,7 @@ public class CompactUi : WindowMediatorSubscriberBase
                 ShowTooltip = () =>
                 {
                     ImGui.BeginTooltip();
-                    ImGui.Text("Open Mare Event Viewer");
+                    ImGui.Text("Open Conclave Event Viewer");
                     ImGui.EndTooltip();
                 }
             }
@@ -114,11 +114,11 @@ public class CompactUi : WindowMediatorSubscriberBase
 #if DEBUG
         string dev = "Dev Build";
         var ver = Assembly.GetExecutingAssembly().GetName().Version!;
-        WindowName = $"Mare Synchronos {dev} ({ver.Major}.{ver.Minor}.{ver.Build})###MareSynchronosMainUI";
+        WindowName = $"Conclave {dev} ({ver.Major}.{ver.Minor}.{ver.Build})###MareSynchronosMainUI";
         Toggle();
 #else
         var ver = Assembly.GetExecutingAssembly().GetName().Version;
-        WindowName = "Mare Synchronos " + ver.Major + "." + ver.Minor + "." + ver.Build + "###MareSynchronosMainUI";
+        WindowName = "Conclave " + ver.Major + "." + ver.Minor + "." + ver.Build + "###MareSynchronosMainUI";
 #endif
         Mediator.Subscribe<SwitchToMainUiMessage>(this, (_) => IsOpen = true);
         Mediator.Subscribe<SwitchToIntroUiMessage>(this, (_) => IsOpen = false);
@@ -151,8 +151,8 @@ public class CompactUi : WindowMediatorSubscriberBase
                 ImGui.AlignTextToFramePadding();
                 ImGui.TextColored(ImGuiColors.DalamudRed, unsupported);
             }
-            UiSharedService.ColorTextWrapped($"Your Mare Synchronos installation is out of date, the current version is {ver.Major}.{ver.Minor}.{ver.Build}. " +
-                $"It is highly recommended to keep Mare Synchronos up to date. Open /xlplugins and update the plugin.", ImGuiColors.DalamudRed);
+            UiSharedService.ColorTextWrapped($"Your Conclave installation is out of date, the current version is {ver.Major}.{ver.Minor}.{ver.Build}. " +
+                $"It is highly recommended to keep Conclave up to date. Open /xlplugins and update the plugin.", ImGuiColors.DalamudRed);
         }
 
         if (!_ipcManager.Initialized)
@@ -566,18 +566,16 @@ public class CompactUi : WindowMediatorSubscriberBase
         {
             ServerState.Connecting => "Attempting to connect to the server.",
             ServerState.Reconnecting => "Connection to server interrupted, attempting to reconnect to the server.",
-            ServerState.Disconnected => "You are currently disconnected from the Mare Synchronos server.",
+            ServerState.Disconnected => "You are currently disconnected from the Conclave server.",
             ServerState.Disconnecting => "Disconnecting from the server",
             ServerState.Unauthorized => "Server Response: " + _apiController.AuthFailureMessage,
-            ServerState.Offline => "Your selected Mare Synchronos server is currently offline.",
+            ServerState.Offline => "Your selected Conclave server is currently offline.",
             ServerState.VersionMisMatch =>
                 "Your plugin or the server you are connecting to is out of date. Please update your plugin now. If you already did so, contact the server provider to update their server to the latest version.",
             ServerState.RateLimited => "You are rate limited for (re)connecting too often. Disconnect, wait 10 minutes and try again.",
             ServerState.Connected => string.Empty,
             ServerState.NoSecretKey => "You have no secret key set for this current character. Open Settings -> Service Settings and set a secret key for the current character. You can reuse the same secret key for multiple characters.",
             ServerState.MultiChara => "Your Character Configuration has multiple characters configured with same name and world. You will not be able to connect until you fix this issue. Remove the duplicates from the configuration in Settings -> Service Settings -> Character Management and reconnect manually after.",
-            ServerState.OAuthMisconfigured => "OAuth2 is enabled but not fully configured, verify in the Settings -> Service Settings that you have OAuth2 connected and, importantly, a UID assigned to your current character.",
-            ServerState.OAuthLoginTokenStale => "Your OAuth2 login token is stale and cannot be used to renew. Go to the Settings -> Service Settings and unlink then relink your OAuth2 configuration.",
             ServerState.NoAutoLogon => "This character has automatic login into Mare disabled. Press the connect button to connect to Mare.",
             _ => string.Empty
         };
@@ -598,8 +596,6 @@ public class CompactUi : WindowMediatorSubscriberBase
             ServerState.RateLimited => ImGuiColors.DalamudYellow,
             ServerState.NoSecretKey => ImGuiColors.DalamudYellow,
             ServerState.MultiChara => ImGuiColors.DalamudYellow,
-            ServerState.OAuthMisconfigured => ImGuiColors.DalamudRed,
-            ServerState.OAuthLoginTokenStale => ImGuiColors.DalamudRed,
             ServerState.NoAutoLogon => ImGuiColors.DalamudYellow,
             _ => ImGuiColors.DalamudRed
         };
@@ -619,8 +615,6 @@ public class CompactUi : WindowMediatorSubscriberBase
             ServerState.RateLimited => "Rate Limited",
             ServerState.NoSecretKey => "No Secret Key",
             ServerState.MultiChara => "Duplicate Characters",
-            ServerState.OAuthMisconfigured => "Misconfigured OAuth2",
-            ServerState.OAuthLoginTokenStale => "Stale OAuth2",
             ServerState.NoAutoLogon => "Auto Login disabled",
             ServerState.Connected => _apiController.DisplayName,
             _ => string.Empty

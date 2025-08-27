@@ -38,7 +38,6 @@ public sealed partial class ApiController : DisposableMediatorSubscriberBase, IM
     private string? _lastUsedToken;
     private HubConnection? _mareHub;
     private ServerState _serverState;
-    private CensusUpdateMessage? _lastCensus;
 
     public ApiController(ILogger<ApiController> logger, HubFactory hubFactory, DalamudUtilService dalamudUtil,
         PairManager pairManager, ServerConfigurationManager serverManager, MareMediator mediator,
@@ -58,7 +57,6 @@ public sealed partial class ApiController : DisposableMediatorSubscriberBase, IM
         Mediator.Subscribe<HubReconnectedMessage>(this, (msg) => _ = MareHubOnReconnectedAsync());
         Mediator.Subscribe<HubReconnectingMessage>(this, (msg) => MareHubOnReconnecting(msg.Exception));
         Mediator.Subscribe<CyclePauseMessage>(this, (msg) => _ = CyclePauseAsync(msg.UserData));
-        Mediator.Subscribe<CensusUpdateMessage>(this, (msg) => _lastCensus = msg);
         Mediator.Subscribe<PauseMessage>(this, (msg) => _ = PauseAsync(msg.UserData));
 
         ServerState = ServerState.Offline;
@@ -107,15 +105,6 @@ public sealed partial class ApiController : DisposableMediatorSubscriberBase, IM
 
     public async Task CreateConnectionsAsync()
     {
-        if (!_serverManager.ShownCensusPopup)
-        {
-            Mediator.Publish(new OpenCensusPopupMessage());
-            while (!_serverManager.ShownCensusPopup)
-            {
-                await Task.Delay(500).ConfigureAwait(false);
-            }
-        }
-
         Logger.LogDebug("CreateConnections called");
 
         if (_serverManager.CurrentServer?.FullPause ?? true)
@@ -127,60 +116,25 @@ public sealed partial class ApiController : DisposableMediatorSubscriberBase, IM
             return;
         }
 
-        if (!_serverManager.CurrentServer.UseOAuth2)
+        var secretKey = _serverManager.GetSecretKey(out bool multi);
+        if (multi)
         {
-            var secretKey = _serverManager.GetSecretKey(out bool multi);
-            if (multi)
-            {
-                Logger.LogWarning("Multiple secret keys for current character");
-                _connectionDto = null;
-                Mediator.Publish(new NotificationMessage("Multiple Identical Characters detected", "Your Service configuration has multiple characters with the same name and world set up. Delete the duplicates in the character management to be able to connect to Mare.",
-                    NotificationType.Error));
-                await StopConnectionAsync(ServerState.MultiChara).ConfigureAwait(false);
-                _connectionCancellationTokenSource?.Cancel();
-                return;
-            }
-
-            if (secretKey.IsNullOrEmpty())
-            {
-                Logger.LogWarning("No secret key set for current character");
-                _connectionDto = null;
-                await StopConnectionAsync(ServerState.NoSecretKey).ConfigureAwait(false);
-                _connectionCancellationTokenSource?.Cancel();
-                return;
-            }
+            Logger.LogWarning("Multiple secret keys for current character");
+            _connectionDto = null;
+            Mediator.Publish(new NotificationMessage("Multiple Identical Characters detected", "Your Service configuration has multiple characters with the same name and world set up. Delete the duplicates in the character management to be able to connect to Mare.",
+                NotificationType.Error));
+            await StopConnectionAsync(ServerState.MultiChara).ConfigureAwait(false);
+            _connectionCancellationTokenSource?.Cancel();
+            return;
         }
-        else
+
+        if (secretKey.IsNullOrEmpty())
         {
-            var oauth2 = _serverManager.GetOAuth2(out bool multi);
-            if (multi)
-            {
-                Logger.LogWarning("Multiple secret keys for current character");
-                _connectionDto = null;
-                Mediator.Publish(new NotificationMessage("Multiple Identical Characters detected", "Your Service configuration has multiple characters with the same name and world set up. Delete the duplicates in the character management to be able to connect to Mare.",
-                    NotificationType.Error));
-                await StopConnectionAsync(ServerState.MultiChara).ConfigureAwait(false);
-                _connectionCancellationTokenSource?.Cancel();
-                return;
-            }
-
-            if (!oauth2.HasValue)
-            {
-                Logger.LogWarning("No UID/OAuth set for current character");
-                _connectionDto = null;
-                await StopConnectionAsync(ServerState.OAuthMisconfigured).ConfigureAwait(false);
-                _connectionCancellationTokenSource?.Cancel();
-                return;
-            }
-
-            if (!await _tokenProvider.TryUpdateOAuth2LoginTokenAsync(_serverManager.CurrentServer).ConfigureAwait(false))
-            {
-                Logger.LogWarning("OAuth2 login token could not be updated");
-                _connectionDto = null;
-                await StopConnectionAsync(ServerState.OAuthLoginTokenStale).ConfigureAwait(false);
-                _connectionCancellationTokenSource?.Cancel();
-                return;
-            }
+            Logger.LogWarning("No secret key set for current character");
+            _connectionDto = null;
+            await StopConnectionAsync(ServerState.NoSecretKey).ConfigureAwait(false);
+            _connectionCancellationTokenSource?.Cancel();
+            return;
         }
 
         await StopConnectionAsync(ServerState.Disconnected).ConfigureAwait(false);
@@ -474,15 +428,7 @@ public sealed partial class ApiController : DisposableMediatorSubscriberBase, IM
 
     private async Task LoadOnlinePairsAsync()
     {
-        CensusDataDto? dto = null;
-        if (_serverManager.SendCensusData && _lastCensus != null)
-        {
-            var world = await _dalamudUtil.GetWorldIdAsync().ConfigureAwait(false);
-            dto = new((ushort)world, _lastCensus.RaceId, _lastCensus.TribeId, _lastCensus.Gender);
-            Logger.LogDebug("Attaching Census Data: {data}", dto);
-        }
-
-        foreach (var entry in await UserGetOnlinePairs(dto).ConfigureAwait(false))
+        foreach (var entry in await UserGetOnlinePairs().ConfigureAwait(false))
         {
             Logger.LogDebug("Pair online: {pair}", entry);
             _pairManager.MarkPairOnline(entry, sendNotif: false);
