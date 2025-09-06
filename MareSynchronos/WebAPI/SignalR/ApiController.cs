@@ -206,7 +206,7 @@ public sealed partial class ApiController : DisposableMediatorSubscriberBase, IM
                     Mediator.Publish(new NotificationMessage("Client outdated",
                         $"Your client is outdated ({currentClientVer.Major}.{currentClientVer.Minor}.{currentClientVer.Build}), current is: " +
                         $"{_connectionDto.CurrentClientVersion.Major}.{_connectionDto.CurrentClientVersion.Minor}.{_connectionDto.CurrentClientVersion.Build}. " +
-                        $"Please keep your Mare Synchronos client up-to-date.",
+                        $"Please keep your Conclave client up-to-date.",
                         NotificationType.Warning));
                 }
 
@@ -216,7 +216,7 @@ public sealed partial class ApiController : DisposableMediatorSubscriberBase, IM
                     if (!_mareConfigService.Current.DebugStopWhining)
                         Mediator.Publish(new NotificationMessage("Modified Game Files detected",
                             "Dalamud is reporting your FFXIV installation has modified game files. Any mods installed through TexTools will produce this message. " +
-                            "Mare Synchronos, Penumbra, and some other plugins assume your FFXIV installation is unmodified in order to work. " +
+                            "Conclave, Penumbra, and some other plugins assume your FFXIV installation is unmodified in order to work. " +
                             "Synchronization with pairs/shells can break because of this. Exit the game, open XIVLauncher, click the arrow next to Log In " +
                             "and select 'repair game files' to resolve this issue. Afterwards, do not install any mods with TexTools. Your plugin configurations will remain, as will mods enabled in Penumbra.",
                             NotificationType.Error, TimeSpan.FromSeconds(15)));
@@ -230,7 +230,7 @@ public sealed partial class ApiController : DisposableMediatorSubscriberBase, IM
                     {
                         Mediator.Publish(new NotificationMessage("Model LOD is enabled",
                             "You have \"Use low-detail models on distant objects (LOD)\" enabled. Having model LOD enabled is known to be a reason to cause " +
-                            "random crashes when loading in or rendering modded pairs. Disabling LOD has a very low performance impact. Disable LOD while using Mare: " +
+                            "random crashes when loading in or rendering modded pairs. Disabling LOD has a very low performance impact. Disable LOD while using Conclave: " +
                             "Go to XIV Menu -> System Configuration -> Graphics Settings and disable the model LOD option.", NotificationType.Warning, TimeSpan.FromSeconds(15)));
                     }
                 }

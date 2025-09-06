@@ -38,11 +38,11 @@ public sealed class CommandManagerService : IDisposable
         {
             HelpMessage = "Opens the Conclave UI" + Environment.NewLine + Environment.NewLine +
                 "Additionally possible commands:" + Environment.NewLine +
-                "\t /conclave toggle - Disconnects from Mare, if connected. Connects to Mare, if disconnected" + Environment.NewLine +
-                "\t /conclave toggle on|off - Connects or disconnects to Mare respectively" + Environment.NewLine +
-                "\t /conclave gpose - Opens the Mare Character Data Hub window" + Environment.NewLine +
-                "\t /conclave analyze - Opens the Mare Character Data Analysis window" + Environment.NewLine +
-                "\t /conclave settings - Opens the Mare Settings window"
+                "\t /conclave toggle - Disconnects from Conclave, if connected. Connects to Conclave, if disconnected" + Environment.NewLine +
+                "\t /conclave toggle on|off - Connects or disconnects to Conclave respectively" + Environment.NewLine +
+                "\t /conclave gpose - Opens the Conclave Character Data Hub window" + Environment.NewLine +
+                "\t /conclave analyze - Opens the Conclave Character Data Analysis window" + Environment.NewLine +
+                "\t /conclave settings - Opens the Conclave Settings window"
         });
     }
 

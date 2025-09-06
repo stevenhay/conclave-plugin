@@ -7,8 +7,8 @@
       "customization"
     ],
     "InternalName": "ConclaveClient",
-    "AssemblyVersion": "1.0.7",
-    "TestingAssemblyVersion": "1.0.7",
+    "AssemblyVersion": "1.0.8",
+    "TestingAssemblyVersion": "1.0.8",
     "RepoUrl": "https://github.com/stevenhay/conclave-plugin",
     "ApplicableVersion": "any",
     "DalamudApiLevel": 13,
@@ -16,9 +16,9 @@
     "IsTestingExclusive": "False",
     "DownloadCount": 0,
     "LastUpdate": 0,
-    "DownloadLinkInstall": "https://github.com/stevenhay/conclave-plugin/releases/download/1.0.7/ConclaveClient.zip",
-    "DownloadLinkTesting": "https://github.com/stevenhay/conclave-plugin/releases/download/1.0.7/ConclaveClient.zip",
-    "DownloadLinkUpdate": "https://github.com/stevenhay/conclave-plugin/releases/download/1.0.7/ConclaveClient.zip",
+    "DownloadLinkInstall": "https://github.com/stevenhay/conclave-plugin/releases/download/1.0.8/ConclaveClient.zip",
+    "DownloadLinkTesting": "https://github.com/stevenhay/conclave-plugin/releases/download/1.0.8/ConclaveClient.zip",
+    "DownloadLinkUpdate": "https://github.com/stevenhay/conclave-plugin/releases/download/1.0.8/ConclaveClient.zip",
     "IconUrl": ""
   }
 ]

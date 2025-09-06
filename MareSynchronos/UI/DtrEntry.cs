@@ -146,19 +146,19 @@ public sealed class DtrEntry : IDisposable, IHostedService
                         .Select(x => string.Format("{0}", _configService.Current.PreferNoteInDtrTooltip ? x.GetNote() ?? x.PlayerName : x.PlayerName));
                 }
 
-                tooltip = $"Mare Synchronos: Connected{Environment.NewLine}----------{Environment.NewLine}{string.Join(Environment.NewLine, visiblePairs)}";
+                tooltip = $"Conclave: Connected{Environment.NewLine}----------{Environment.NewLine}{string.Join(Environment.NewLine, visiblePairs)}";
                 colors = _configService.Current.DtrColorsPairsInRange;
             }
             else
             {
-                tooltip = "Mare Synchronos: Connected";
+                tooltip = "Conclave: Connected";
                 colors = _configService.Current.DtrColorsDefault;
             }
         }
         else
         {
             text = "\uE044 \uE04C";
-            tooltip = "Mare Synchronos: Not Connected";
+            tooltip = "Conclave: Not Connected";
             colors = _configService.Current.DtrColorsNotConnected;
         }
 
